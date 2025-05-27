@@ -50,6 +50,12 @@ void run_server() {
     sockaddr_in client_addr{};
     socklen_t client_len = sizeof(client_addr);
     SOCKET client_socket = accept(server_socket, (sockaddr*)&client_addr, &client_len);
+
+    // Print client IP
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
+    std::cout << "Client connected from IP: " << client_ip << std::endl;
+
     if (client_socket == INVALID_SOCKET) {
         std::cerr << "Accept failed.\n";
         return;
