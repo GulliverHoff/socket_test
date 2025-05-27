@@ -52,6 +52,7 @@ CMakeUserPresets.json
 *.exe
 *.out
 *.app
+/executables/
 
 # Editor and IDE settings
 .vscode/
