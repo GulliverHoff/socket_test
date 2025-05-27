@@ -2,6 +2,7 @@
 #include "server.hpp"
 
 #ifdef _WIN32
+  #include "iostream"
   #include <winsock2.h>
 #endif
 
