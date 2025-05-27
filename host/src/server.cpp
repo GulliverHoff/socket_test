@@ -52,13 +52,22 @@ void run_server() {
         return;
     }
 
-    char buffer[1024] = {};
-    int received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
-    if (received > 0) {
-        buffer[received] = '\0';
-        std::cout << "Received: " << buffer << std::endl;
-    } else {
-        std::cerr << "Receive failed.\n";
+    std::cout << "Client connected. Type integers to send:\n";
+
+    while (true) {
+        int32_t number;
+        std::cout << "> ";
+        if (!(std::cin >> number)) {
+            std::cerr << "Invalid input. Exiting.\n";
+            break;
+        }
+
+        int32_t net_number = htonl(number);
+        int sent = send(client_socket, (char*)&net_number, sizeof(net_number), 0);
+        if (sent <= 0) {
+            std::cerr << "Send failed or client disconnected.\n";
+            break;
+        }
     }
 
     CLOSESOCKET(client_socket);
