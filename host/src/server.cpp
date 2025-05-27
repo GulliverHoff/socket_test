@@ -30,8 +30,8 @@ void run_server() {
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
     
-    // server_addr.sin_addr.s_addr = INADDR_ANY;
-    inet_pton(AF_INET, "192.168.80.1", &server_addr.sin_addr);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    //inet_pton(AF_INET, "192.168.80.1", &server_addr.sin_addr);
 
     server_addr.sin_port = htons(31415);
 
