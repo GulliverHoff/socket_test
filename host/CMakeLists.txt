@@ -4,7 +4,15 @@ set(HOST_SOURCES
     src/server.cpp
 )
 
-add_executable(TCP_Host ${HOST_SOURCES})
+add_executable(TCP_Host src/main.cpp)
+
+if(MULTI_CLIENT)
+    target_sources(TCP_Host PRIVATE src/multi_server.cpp)
+    message(STATUS "multi-client build")
+else()
+    target_sources(TCP_Host PRIVATE src/server.cpp)
+endif()
+
 
 target_include_directories(TCP_Host PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(TCP_Host PRIVATE ip_utils)
