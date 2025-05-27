@@ -12,11 +12,4 @@ add_subdirectory(utils)
 add_subdirectory(host)
 add_subdirectory(client)
 
-
-add_executable(IP_demo proj_info.cpp)
-target_link_libraries(IP_demo PRIVATE ip_utils)
-
-if(WIN32)
-    target_compile_definitions(IP_demo PRIVATE _WIN32_WINNT=0x0601)
-    target_link_libraries(IP_demo PRIVATE ws2_32 iphlpapi)
-endif()
+add_subdirectory(proj_demo)
