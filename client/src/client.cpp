@@ -31,10 +31,12 @@ void run_client(const char* server_ip, int port) {
     inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
 
     if (connect(sock, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        perror("connect");
         std::cerr << "Connection failed to " << server_ip << ":" << port << "\n";
         CLOSESOCKET(sock);
         return;
     }
+
 
     std::cout << "Connected to server. Waiting for integers...\n";
 
