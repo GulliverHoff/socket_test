@@ -2,11 +2,6 @@
 #include "ip_utils.hpp"
 
 #include <iostream>
-#include <algorithm>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <atomic>
 #include <cstring>
 
 #ifdef _WIN32
@@ -23,44 +18,6 @@
   #define INVALID_SOCKET -1
 #endif
 
-namespace {
-    std::vector<SOCKET> clients;
-    std::mutex clients_mutex;
-    std::atomic<bool> running{true};
-
-    void client_thread(SOCKET client_socket, std::string client_ip) {
-        std::cout << "Client thread started for " << client_ip << "\n";
-
-        // Wait until client disconnects (you could read messages here if needed)
-        char buffer[1];
-        while (recv(client_socket, buffer, 1, MSG_PEEK) > 0) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-
-        std::cout << "Client " << client_ip << " disconnected.\n";
-
-        // Remove from clients list
-        std::lock_guard<std::mutex> lock(clients_mutex);
-        clients.erase(std::remove(clients.begin(), clients.end(), client_socket), clients.end());
-        CLOSESOCKET(client_socket);
-    }
-
-    void broadcast_integer(int32_t number) {
-        int32_t net_number = htonl(number);
-        std::lock_guard<std::mutex> lock(clients_mutex);
-
-        for (auto it = clients.begin(); it != clients.end(); ) {
-            if (send(*it, (char*)&net_number, sizeof(net_number), 0) <= 0) {
-                std::cerr << "Failed to send to a client. Removing.\n";
-                CLOSESOCKET(*it);
-                it = clients.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-}
-
 void run_server() {
     printLocalIP();
 
@@ -72,45 +29,41 @@ void run_server() {
 
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
+    
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(12345);
+    //inet_pton(AF_INET, "192.168.80.1", &server_addr.sin_addr);
+
+    server_addr.sin_port = htons(31415);
 
     if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         std::cerr << "Bind failed.\n";
         return;
     }
 
-    if (listen(server_socket, SOMAXCONN) < 0) {
+    if (listen(server_socket, 1) < 0) {
         std::cerr << "Listen failed.\n";
         return;
     }
 
-    std::cout << "Server listening on port 12345...\n";
+    std::cout << "Server listening on port 31415...\n";
 
-    // Accept clients in a separate thread
-    std::thread accept_thread([&]() {
-        while (running) {
-            sockaddr_in client_addr{};
-            socklen_t client_len = sizeof(client_addr);
-            SOCKET client_socket = accept(server_socket, (sockaddr*)&client_addr, &client_len);
-            if (client_socket == INVALID_SOCKET) continue;
+    sockaddr_in client_addr{};
+    socklen_t client_len = sizeof(client_addr);
+    SOCKET client_socket = accept(server_socket, (sockaddr*)&client_addr, &client_len);
 
-            char client_ip[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
-            std::cout << "Client connected from IP: " << client_ip << std::endl;
+    // Print client IP
+    char client_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);
+    std::cout << "Client connected from IP: " << client_ip << std::endl;
 
-            {
-                std::lock_guard<std::mutex> lock(clients_mutex);
-                clients.push_back(client_socket);
-            }
+    if (client_socket == INVALID_SOCKET) {
+        std::cerr << "Accept failed.\n";
+        return;
+    }
 
-            std::thread(client_thread, client_socket, std::string(client_ip)).detach();
-        }
-    });
+    std::cout << "Client connected. Type integers to send:\n";
 
-    // Main input loop for sending integers
-    std::cout << "Type integers to broadcast (Ctrl+C to stop):\n";
-    while (running) {
+    while (true) {
         int32_t number;
         std::cout << "> ";
         if (!(std::cin >> number)) {
@@ -118,17 +71,17 @@ void run_server() {
             break;
         }
 
-        broadcast_integer(number);
+        int32_t net_number = htonl(number);
+        int sent = send(client_socket, (char*)&net_number, sizeof(net_number), 0);
+        if (sent == 0) {
+            std::cout << "Client disconnected gracefully.\n";
+            break;
+        } else if (sent < 0) {
+            std::cerr << "Send failed or client disconnected unexpectedly.\n";
+            break;
+        }
     }
 
-    running = false;
+    CLOSESOCKET(client_socket);
     CLOSESOCKET(server_socket);
-    accept_thread.join();
-
-    // Clean up remaining clients
-    std::lock_guard<std::mutex> lock(clients_mutex);
-    for (SOCKET sock : clients) {
-        CLOSESOCKET(sock);
-    }
-    clients.clear();
 }
