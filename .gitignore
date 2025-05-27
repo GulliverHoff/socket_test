@@ -1,3 +1,25 @@
+# Build directories
+/build/
+/build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+
+# Ninja build files
+*.ninja
+.ninja_deps
+.ninja_log
+
+# CTest files
+CTestTestfile.cmake
+Testing/
+test_detail.xml
+
+# CMake presets
+CMakeUserPresets.json
+
 # Prerequisites
 *.d
 
@@ -30,3 +52,25 @@
 *.exe
 *.out
 *.app
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Backup and swap files
+*~
+*.swp
+*.swo
+*.bak
+
+# Package managers (optional)
+# Conan
+conanbuildinfo.*
+.conan/
+# vcpkg
+vcpkg_installed/
