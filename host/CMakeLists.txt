@@ -1,4 +1,8 @@
-file(GLOB HOST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+#file(GLOB HOST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+set(HOST_SOURCES 
+    src/main.cpp
+    src/server.cpp
+)
 
 add_executable(TCP_Host ${HOST_SOURCES})
 
