@@ -15,9 +15,9 @@ int main() {
     }
 #endif
 
-    printLocalIP();
+    //printLocalIP();
 
-    //run_server();
+    run_server();
 
 #ifdef _WIN32
     WSACleanup();
