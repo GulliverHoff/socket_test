@@ -67,8 +67,8 @@ void run_server() {
         int32_t number;
         std::cout << "> ";
         if (!(std::cin >> number)) {
-            std::cerr << "Invalid input. Exiting.\n";
-            continue;
+            std::cerr << "Invalid input. exiting\n";
+            break;
         }
 
         int32_t net_number = htonl(number);
