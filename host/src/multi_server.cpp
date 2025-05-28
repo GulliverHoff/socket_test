@@ -73,7 +73,7 @@ void run_server() {
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(12345);
+    server_addr.sin_port = htons(31415);
 
     if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         std::cerr << "Bind failed.\n";
@@ -85,7 +85,7 @@ void run_server() {
         return;
     }
 
-    std::cout << "Server listening on port 12345...\n";
+    std::cout << "Server listening on port 31415...\n";
 
     // Accept clients in a separate thread
     std::thread accept_thread([&]() {
